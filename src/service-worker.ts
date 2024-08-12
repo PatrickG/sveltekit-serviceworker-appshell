@@ -18,7 +18,8 @@ self.addEventListener('install', (event) => {
 	// Create a new cache and add all files to it
 	async function addFilesToCache() {
 		const cache = await caches.open(CACHE);
-		await cache.addAll(ASSETS);
+		await cache.addAll([...ASSETS, '/appshell']); // Cache the appshell
+		// You could also add it to the `ASSETS` array directly (line 12)
 	}
 
 	event.waitUntil(addFilesToCache());
@@ -73,6 +74,15 @@ self.addEventListener('fetch', (event) => {
 
 			if (response) {
 				return response;
+			}
+
+			// if this is a full page load, try to respond with the appshell
+			if (event.request.mode === 'navigate') {
+				const response = await cache.match('/appshell');
+
+				if (response) {
+					return response;
+				}
 			}
 
 			// if there's no cache, then just error out
