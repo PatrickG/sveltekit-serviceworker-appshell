@@ -1,4 +1,9 @@
 /// <reference types="@sveltejs/kit" />
+/// <reference no-default-lib="true"/>
+/// <reference lib="esnext" />
+/// <reference lib="webworker" />
+declare const self: ServiceWorkerGlobalScope;
+
 import { build, files, version } from '$service-worker';
 
 // Create a unique cache name for this deployment
