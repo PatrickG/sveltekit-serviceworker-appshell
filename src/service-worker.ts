@@ -9,6 +9,9 @@ import { build, files, version } from '$service-worker';
 // Create a unique cache name for this deployment
 const CACHE = `cache-${version}`;
 
+// relative to `${base}/service-worker.js`
+const APP_SHELL = './appshell';
+
 const ASSETS = [
 	...build, // the app itself
 	...files  // everything in `static`
@@ -18,8 +21,8 @@ self.addEventListener('install', (event) => {
 	// Create a new cache and add all files to it
 	async function addFilesToCache() {
 		const cache = await caches.open(CACHE);
-		await cache.addAll([...ASSETS, '/appshell']); // Cache the appshell
-		// You could also add it to the `ASSETS` array directly (line 12)
+		await cache.addAll([...ASSETS, APP_SHELL]); // Cache the appshell
+		// You could also add it to the `ASSETS` array directly (line 15)
 	}
 
 	event.waitUntil(addFilesToCache());
@@ -78,9 +81,38 @@ self.addEventListener('fetch', (event) => {
 
 			// if this is a full page load, try to respond with the appshell
 			if (event.request.mode === 'navigate') {
-				const response = await cache.match('/appshell');
+				const response = await cache.match(APP_SHELL);
 
 				if (response) {
+					/**
+					 * if you can not use `kit.paths.relative: false`, uncomment this section
+					 * @see https://github.com/PatrickG/sveltekit-serviceworker-appshell/issues/1
+					 * @thanks https://github.com/tizu69
+					 */
+					// const depth = url.pathname.split('/').length - location.pathname.split('/').length;
+					// if (depth > 0) {
+					// 	const path_prefix = '../'.repeat(depth);
+
+					// 	const headers = new Headers();
+					// 	response.headers.forEach((value, name) => {
+					// 		headers.append(
+					// 			name,
+					// 			name.toLocaleLowerCase() === 'link'
+					// 				? value.replace(/<\.\//g, '<' + path_prefix)
+					// 				: value
+					// 		);
+					// 	});
+
+					// 	return new Response(
+					// 		(await response.text()).replace(/(['"])\.\/?/g, '$1' + path_prefix),
+					// 		{
+					// 			headers,
+					// 			status: response.status,
+					// 			statusText: response.statusText
+					// 		}
+					// 	);
+					// }
+
 					return response;
 				}
 			}

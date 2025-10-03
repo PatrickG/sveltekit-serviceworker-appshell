@@ -13,7 +13,9 @@ const config = {
 		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
 		adapter: adapter(),
 		paths: {
-			relative: false // required for nested routes
+			// required for nested routes
+			// if you can not use this, uncomment line 92-114 in `src/service-worker.ts`
+			relative: false
 		}
 	}
 };
